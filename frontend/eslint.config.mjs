@@ -12,7 +12,18 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Frontend folder moved under frontend/; ignore its build artifacts.
+    "frontend/.next/**",
+    // Node module noise.
+    "node_modules/**",
   ]),
+  {
+    // We use the App Router exclusively, no `pages/` directory.
+    // Disable rules that hard-require it.
+    rules: {
+      "@next/next/no-html-link-for-pages": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

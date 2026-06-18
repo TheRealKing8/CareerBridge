@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /out/
+/frontend/.next/
 
 # production
 /build
@@ -39,6 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/frontend/next-env.d.ts
+/frontend/tsconfig.tsbuildinfo
 
 # prisma — keep schema and migrations in git, ignore local SQLite data files
 /prisma/*.db
