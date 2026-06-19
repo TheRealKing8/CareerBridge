@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Admin/employer/student+employee dashboard dark theme: any element
+   inside a [data-dash-theme="dark"] ancestor inherits the dark tokens.
+   Public pages do NOT set this attribute, so they stay light. */
+@custom-variant dash-dark (&:where([data-dash-theme="dark"], [data-dash-theme="dark"] *));
+
 :root {
   /* Brand palette — locked from the CareerBridge design spec. */
   --color-primary: #2563eb;       /* blue, trust */
@@ -10,6 +15,17 @@
   --color-muted: #64748b;         /* secondary text */
   --color-border: #e2e8f0;        /* dividers */
   --color-card: #ffffff;          /* card surface */
+}
+
+[data-dash-theme="dark"] {
+  --color-primary: #60a5fa;       /* lighter blue for dark surfaces */
+  --color-secondary: #e2e8f0;
+  --color-accent: #34d399;
+  --color-background: #0b1220;    /* near-black with a blue cast */
+  --color-foreground: #e2e8f0;
+  --color-muted: #94a3b8;
+  --color-border: #1e293b;
+  --color-card: #0f172a;
 }
 
 @theme inline {
@@ -23,16 +39,6 @@
   --color-card: var(--color-card);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #0b1220;
-    --color-foreground: #e2e8f0;
-    --color-muted: #94a3b8;
-    --color-border: #1e293b;
-    --color-card: #0f172a;
-  }
 }
 
 body {

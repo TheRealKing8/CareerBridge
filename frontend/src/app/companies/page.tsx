@@ -1,5 +1,3 @@
-import { SiteHeader } from "@/components/site/SiteHeader";
-import { SiteFooter } from "@/components/site/SiteFooter";
 import { CompanyCard } from "@/components/companies/CompanyCard";
 import { prisma } from "@/lib/prisma";
 
@@ -19,40 +17,36 @@ export default async function CompaniesPage() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Top Companies</h1>
-          <p className="mt-1 text-muted">
-            {employers.length}{" "}
-            {employers.length === 1 ? "verified employer" : "verified employers"} hiring on CareerBridge
-          </p>
-        </div>
+    <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Top Companies</h1>
+        <p className="mt-1 text-muted">
+          {employers.length}{" "}
+          {employers.length === 1 ? "verified employer" : "verified employers"} hiring on CareerBridge
+        </p>
+      </div>
 
-        {employers.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center text-muted">
-            No verified employers yet. Check back soon.
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {employers.map((e) => (
-              <CompanyCard
-                key={e.id}
-                company={{
-                  id: e.id,
-                  companyName: e.companyName,
-                  industry: e.industry,
-                  location: e.location,
-                  description: e.description,
-                  companyLogoUrl: e.companyLogoUrl,
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </main>
-      <SiteFooter />
-    </div>
+      {employers.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center text-muted">
+          No verified employers yet. Check back soon.
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {employers.map((e) => (
+            <CompanyCard
+              key={e.id}
+              company={{
+                id: e.id,
+                companyName: e.companyName,
+                industry: e.industry,
+                location: e.location,
+                description: e.description,
+                companyLogoUrl: e.companyLogoUrl,
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </main>
   );
 }

@@ -1,6 +1,13 @@
+﻿// DEV ONLY — these accounts have a real password (`password123`) so the
+// auth flow can be tested end-to-end with `npm run seed && sign in`.
+// Do NOT reuse this seed in any non-dev environment: real users would
+// inherit the same password and the world would burn.
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const DEV_PASSWORD = "password123";
+const DEV_HASH = bcrypt.hashSync(DEV_PASSWORD, 12);
 
 async function main() {
   // Clear in dependency order
@@ -16,7 +23,7 @@ async function main() {
   const alice = await prisma.user.create({
     data: {
       email: "alice@student.test",
-      passwordHash: "SEED_NO_LOGIN",
+      passwordHash: DEV_HASH,
       fullName: "Alice Wanjiku",
       role: "STUDENT",
       status: "ACTIVE",
@@ -30,11 +37,22 @@ async function main() {
     },
   });
 
+  // Admin — one seed account so manual admin flow can be tested.
+  await prisma.user.create({
+    data: {
+      email: "admin@careerbridge.test",
+      passwordHash: DEV_HASH,
+      fullName: "Platform Admin",
+      role: "ADMIN",
+      status: "ACTIVE",
+    },
+  });
+
   // Employers (one verified, one pending)
   const safaricom = await prisma.user.create({
     data: {
       email: "jobs@safaricom.test",
-      passwordHash: "SEED_NO_LOGIN",
+      passwordHash: DEV_HASH,
       fullName: "Jane Achieng",
       role: "EMPLOYER",
       status: "ACTIVE",
@@ -58,7 +76,7 @@ async function main() {
   const equity = await prisma.user.create({
     data: {
       email: "hr@equity-bank.test",
-      passwordHash: "SEED_NO_LOGIN",
+      passwordHash: DEV_HASH,
       fullName: "Peter Mwangi",
       role: "EMPLOYER",
       status: "ACTIVE",
@@ -81,7 +99,7 @@ async function main() {
   const craft = await prisma.user.create({
     data: {
       email: "careers@craft-silicon.test",
-      passwordHash: "SEED_NO_LOGIN",
+      passwordHash: DEV_HASH,
       fullName: "Susan Otieno",
       role: "EMPLOYER",
       status: "ACTIVE",
@@ -104,7 +122,7 @@ async function main() {
   const twiga = await prisma.user.create({
     data: {
       email: "people@twiga-foods.test",
-      passwordHash: "SEED_NO_LOGIN",
+      passwordHash: DEV_HASH,
       fullName: "David Kiprop",
       role: "EMPLOYER",
       status: "ACTIVE",
@@ -142,7 +160,7 @@ async function main() {
     },
     {
       employerId: safaricom.employerProfile!.id,
-      title: "Graduate Trainee — Data Analytics",
+      title: "Graduate Trainee â€” Data Analytics",
       type: "GRADUATE_TRAINEE",
       location: "Nairobi, Kenya",
       remote: false,
@@ -164,14 +182,14 @@ async function main() {
       salaryMax: 280000,
       salaryCurrency: "KES",
       description:
-        "Help us rebuild our digital banking experience from the ground up. Equity's mobile and web apps serve millions of customers — quality matters.\n\nYou'll have:\n- A modern React + TypeScript stack\n- Direct collaboration with design and product\n- A culture that ships incrementally",
+        "Help us rebuild our digital banking experience from the ground up. Equity's mobile and web apps serve millions of customers â€” quality matters.\n\nYou'll have:\n- A modern React + TypeScript stack\n- Direct collaboration with design and product\n- A culture that ships incrementally",
       status: "OPEN",
       publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
     {
       employerId: equity.employerProfile!.id,
-      title: "Risk & Compliance Analyst — Attachment",
+      title: "Risk & Compliance Analyst â€” Attachment",
       type: "ATTACHMENT",
       location: "Nairobi, Kenya",
       remote: false,
@@ -227,7 +245,7 @@ async function main() {
     },
     {
       employerId: twiga.employerProfile!.id,
-      title: "Operations Associate — Contract (6 months)",
+      title: "Operations Associate â€” Contract (6 months)",
       type: "CONTRACT",
       location: "Nairobi, Kenya",
       remote: false,
@@ -278,7 +296,7 @@ async function main() {
         studentId: aliceProfile.id,
         jobId: aliceIntern.id,
         status: "UNDER_REVIEW",
-        coverLetter: "Excited to apply for the Safaricom internship…",
+        coverLetter: "Excited to apply for the Safaricom internshipâ€¦",
       },
     });
     await prisma.notification.create({
@@ -292,10 +310,20 @@ async function main() {
   }
 
   console.log("✅ Seed complete:");
-  console.log("  - 1 student (Alice)");
+  console.log(`  - 1 student (Alice)`);
   console.log("  - 4 verified employers");
+  console.log("  - 1 admin (platform owner)");
   console.log("  - 8 OPEN jobs + 1 CLOSED job");
   console.log("  - 1 saved job, 1 application, 1 notification");
+  console.log("");
+  console.log(`🔑 DEV test password for ALL seeded accounts: ${DEV_PASSWORD}`);
+  console.log("   Sign in at /login with any of:");
+  console.log("     - alice@student.test          (STUDENT)");
+  console.log("     - jobs@safaricom.test        (EMPLOYER)");
+  console.log("     - hr@equity-bank.test        (EMPLOYER)");
+  console.log("     - careers@craft-silicon.test (EMPLOYER)");
+  console.log("     - people@twiga-foods.test    (EMPLOYER)");
+  console.log("     - admin@careerbridge.test    (ADMIN)");
 }
 
 main()

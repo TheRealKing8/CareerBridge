@@ -43,6 +43,20 @@ next-env.d.ts
 /frontend/next-env.d.ts
 /frontend/tsconfig.tsbuildinfo
 
-# prisma — keep schema and migrations in git, ignore local SQLite data files
-/prisma/*.db
-/prisma/*.db-journal
+# prisma — keep schema and migrations in git. The dev DB is XAMPP MariaDB,
+# not a local file, so no SQLite artifacts to ignore here.
+
+# backend/ service (reserved folder; ignore generated artifacts)
+/backend/node_modules
+/backend/dist
+/backend/.env
+
+# one-off diagnostic / probe scripts (kept locally; not part of the build)
+/scripts/probe-*.ts
+/scripts/check-*.ts
+/scripts/test-chat.ts
+/scripts/list-free-models.ts
+/scripts/cleanup-test-users.ts
+/scripts/get-ids.ts
+/prisma/scripts/
+

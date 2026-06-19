@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
+import { getDashboardTheme } from "@/lib/theme";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 /**
  * Site-wide header. Server component — checks if a user is signed in
  * and renders Sign In / Sign Up vs. a profile link. Sticky on scroll.
+ *
+ * The moon/sun toggle flips the dashboard theme. The header itself
+ * stays light on public pages; the toggle's effect is only visible
+ * after navigating into a dashboard. From a dashboard, the toggle
+ * instantly changes the surrounding dashboard chrome.
  */
 export async function SiteHeader() {
   const user = await getCurrentUser();
+  const theme = await getDashboardTheme();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
@@ -34,6 +42,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle theme={theme} />
           {user ? (
             <Link
               href={

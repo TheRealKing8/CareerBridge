@@ -13,7 +13,7 @@
  * Prisma-generated `enum` imports without changing call sites.
  */
 
-export const USER_ROLES = ["STUDENT", "EMPLOYER", "ADMIN"] as const;
+export const USER_ROLES = ["STUDENT", "EMPLOYER", "EMPLOYEE", "ADMIN"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 export const USER_STATUSES = ["PENDING", "ACTIVE", "SUSPENDED"] as const;

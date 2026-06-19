@@ -1,28 +1,25 @@
 // CareerBridge — Phase 1 schema
 //
-// Provider: SQLite (file-based, dev). To swap to PostgreSQL or MySQL later,
-// change `provider` and `DATABASE_URL` only. The schema uses no
-// SQLite-specific features.
+// Provider: MariaDB / MySQL via XAMPP (dev). All schema features used
+// below are standard SQL — switching to PostgreSQL for production later
+// is a one-line `provider` change.
 //
-// 7 tables: User, StudentProfile, EmployerProfile, Job, Application,
-// SavedJob, Notification.
+// 10 tables: User, Account, Session, VerificationToken, StudentProfile,
+// EmployerProfile, Job, Application, SavedJob, Notification.
 //
-// IMPORTANT — SQLite + Prisma limitation:
-// Prisma's SQLite connector does not support `enum` blocks. Each
-// enum-shaped column below is a `String` with the allowed values
-// documented in a comment, and the application layer (Zod validators
-// at the API boundary) enforces the membership. When we move to
-// Postgres for production we can promote these back to real `enum`
-// types — no application-level changes needed because the values
-// already match.
+// Prisma does not render MySQL `ENUM` types when the database provider
+// supports them, but we deliberately use `String` here so the column
+// type stays portable across MariaDB / MySQL / PostgreSQL. Membership
+// is enforced at the API boundary by Zod validators; the allowed values
+// are documented inline below.
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native"]
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -31,7 +28,7 @@ datasource db {
 // String enum columns (validated by Zod):
 //
 // User.role:
-//   "STUDENT" | "EMPLER" | "ADMIN"
+//   "STUDENT" | "EMPLOYER" | "EMPLOYEE" | "ADMIN"
 //
 // User.status:
 //   "PENDING" | "ACTIVE" | "SUSPENDED"
@@ -52,21 +49,68 @@ datasource db {
 //   | "JOB_REJECTED" | "GENERIC"
 
 model User {
-  id            String     @id @default(cuid())
-  email         String     @unique
-  passwordHash  String
-  fullName      String
-  role          String     // STUDENT | EMPLOYER | ADMIN
-  status        String     @default("PENDING")  // PENDING | ACTIVE | SUSPENDED
-  emailVerified DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id               String     @id @default(cuid())
+  email            String     @unique
+  passwordHash     String
+  fullName         String
+  role             String     // STUDENT | EMPLOYER | ADMIN
+  status           String     @default("PENDING")  // PENDING | ACTIVE | SUSPENDED
+  emailVerified    DateTime?
+  passwordChangedAt DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
   studentProfile  StudentProfile?
   employerProfile EmployerProfile?
+  employeeProfile EmployeeProfile?
   notifications   Notification[]
 
+  // NextAuth relations. Empty in our JWT flow but required by the adapter.
+  accounts Account[]
+  sessions Session[]
+
   @@index([role, status])
+}
+
+// NextAuth Prisma adapter tables.
+// `Account` and `Session` stay empty in our JWT-only flow, but the adapter
+// contract requires the models to exist. `VerificationToken` is reserved
+// for Phase 2c (email verification / password reset).
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model StudentProfile {
@@ -114,6 +158,30 @@ model EmployerProfile {
   @@index([verified])
 }
 
+model EmployeeProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  currentJobTitle   String?
+  currentCompany    String?
+  yearsOfExperience Int?
+  skills            String?  // Comma-separated for now. Skill table is a future cleanup.
+  phone             String?
+  bio               String?
+  cvUrl             String?
+  linkedinUrl       String?
+  githubUrl         String?
+  portfolioUrl      String?
+  location          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@index([yearsOfExperience])
+  @@index([location])
+}
+
 model Job {
   id             String    @id @default(cuid())
   employerId     String
@@ -141,20 +209,24 @@ model Job {
 }
 
 model Application {
-  id          String   @id @default(cuid())
-  jobId       String
-  studentId   String
-  coverLetter String?
-  cvUrl       String?
-  status      String   @default("SUBMITTED")  // SUBMITTED | UNDER_REVIEW | SHORTLISTED | REJECTED | WITHDRAWN
-  appliedAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(cuid())
+  jobId            String
+  studentId        String?  // One of {studentId, employeeProfileId} is non-null. Enforced at the application layer.
+  employeeProfileId String?
+  coverLetter      String?
+  cvUrl            String?
+  status           String   @default("SUBMITTED")  // SUBMITTED | UNDER_REVIEW | SHORTLISTED | REJECTED | WITHDRAWN
+  appliedAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  job     Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  job             Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  student         StudentProfile?  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  employeeProfile EmployeeProfile? @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
 
   @@unique([jobId, studentId])
+  @@unique([jobId, employeeProfileId])
   @@index([studentId, status])
+  @@index([employeeProfileId, status])
   @@index([jobId, status])
 }
 

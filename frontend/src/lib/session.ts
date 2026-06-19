@@ -1,13 +1,19 @@
-import { prisma } from "@/lib/prisma";
-import { USER_ROLES, type UserRole } from "@/lib/enums";
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+import type { NextAuthOptions } from "next-auth";
+import type { UserRole } from "@/lib/enums";
+import { authOptions } from "@/lib/auth";
 
 /**
- * Returns the currently authenticated user (server side) or null.
+ * The shape of "the currently signed-in user" across the app.
  *
- * This is a temporary, no-auth version — it always returns null. It
- * will be replaced with a NextAuth-aware version (calling `auth()`)
- * in the auth step. The shape is already locked in so callers won't
- * need to change.
+ *   - Server components / route handlers: use `getCurrentUser()`.
+ *   - Need a non-null user:               use `requireUser()` (redirects to /login).
+ *   - Need a specific role:               use `requireRole([...allowed])`.
+ *
+ * The `getCurrentUser()` shape is locked in — call sites in the public
+ * pages (`SiteHeader`, `/jobs/[id]`) already depend on it. Don't rename
+ * fields without updating those callers.
  */
 export type CurrentUser = {
   id: string;
@@ -15,36 +21,67 @@ export type CurrentUser = {
   fullName: string;
   role: UserRole;
   status: string;
+  emailVerified: Date | null;
 };
 
+/**
+ * Server-side session reader. Uses NextAuth v4's `getServerSession`
+ * with the shared `authOptions` (same instance as the API route).
+ *
+ * Returns `null` for signed-out visitors so public pages render as
+ * logged-out without throwing.
+ */
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  // No auth wired yet — return null so public pages render as
-  // signed-out. Will be replaced with:
-  //   const session = await auth();
-  //   if (!session?.user) return null;
-  //   return session.user as CurrentUser;
-  return null;
+  const session = await getServerSession(authOptions as NextAuthOptions);
+  if (!session?.user?.email) return null;
+  const u = session.user as {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    status: string;
+    emailVerified?: Date | string | null;
+  };
+  const ev = u.emailVerified;
+  return {
+    id: u.id,
+    email: u.email,
+    fullName: u.name ?? "",
+    role: u.role as UserRole,
+    status: u.status,
+    emailVerified: ev ? new Date(ev as string) : null,
+  };
 }
 
 /**
- * Convenience guard for use in route handlers / server actions.
- * Throws a clean 401-shaped error when there is no user.
+ * Server-component guard. Redirects to /login (with a `?next=` hint)
+ * if the user is not authenticated.
  */
 export async function requireUser(): Promise<CurrentUser> {
   const u = await getCurrentUser();
-  if (!u) {
-    throw Object.assign(new Error("Unauthorized"), { status: 401 });
-  }
+  if (!u) redirect("/login");
   return u;
 }
 
-export async function requireRole(allowed: readonly UserRole[]): Promise<CurrentUser> {
+/**
+ * Server-component role guard. Calls `requireUser()` first, then
+ * redirects to the user's own dashboard if their role isn't allowed.
+ *
+ * The proxy (Next.js 16; formerly "middleware") is the primary gate;
+ * this is defense-in-depth.
+ */
+export async function requireRole(
+  allowed: readonly UserRole[],
+): Promise<CurrentUser> {
   const u = await requireUser();
   if (!allowed.includes(u.role)) {
-    throw Object.assign(new Error("Forbidden"), { status: 403 });
+    const home =
+      u.role === "ADMIN"
+        ? "/admin"
+        : u.role === "EMPLOYER"
+          ? "/employer"
+          : "/dashboard";
+    redirect(home);
   }
   return u;
 }
-
-// Re-export for convenience
-export { prisma, USER_ROLES };
