@@ -19,7 +19,11 @@
       }
     ],
     "baseUrl": ".",
-    "ignoreDeprecations": "5.0", // TODO: drop baseUrl + this flag before TS 7.0 — paths resolves relative to tsconfig when baseUrl is absent.
+    // TS 5.9.3 installed locally doesn't recognise "6.0" yet, so we keep
+    // "5.0" for the build. The IDE preview (TS 6.x) flags it as still
+    // deprecated — once we upgrade the toolchain, drop baseUrl entirely
+    // and remove this flag.
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@/*": ["./src/*"]
     }

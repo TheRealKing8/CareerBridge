@@ -4,6 +4,7 @@ import { z } from "zod";
 import { apiError } from "@/lib/api-error";
 import { getCurrentUser } from "@/lib/session";
 import { clientKey, consume as consumeRateLimit } from "@/lib/rate-limit";
+import { buildChatContext, renderChatContext } from "@/lib/services/ai-context";
 
 // QW8: /api/chat now requires an authenticated user and is rate-limited
 // per user (60 requests per hour). The previous version was wide open.
@@ -13,7 +14,7 @@ export const runtime = "nodejs";
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 const DEFAULT_MODEL = "openai/gpt-oss-20b:free";
 
-const SYSTEM_PROMPT = `You are CareerBridge AI, a friendly career advisor for students, graduates, and early-career job seekers in East Africa. Be concise (≤120 words), warm, and concrete. If the user asks about specific jobs on the platform, do not invent listings — point them to /jobs on the site. If you don't know something, say so.`;
+const BASE_SYSTEM_PROMPT = `You are CareerBridge AI, a friendly career advisor for students, graduates, and early-career job seekers in East Africa. Be concise (≤120 words), warm, and concrete. If the user asks about specific jobs on the platform, do not invent listings — point them to /jobs on the site. If you don't know something, say so.`;
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant", "system"]),
@@ -63,13 +64,19 @@ export async function POST(req: Request) {
 
   const model = process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL;
 
+  // Build a live snapshot of platform data so the model answers with
+  // current numbers and real job titles, not invented ones. We already
+  // have the viewer in scope from the auth check above.
+  const context = await buildChatContext(user);
+  const systemPrompt = `${BASE_SYSTEM_PROMPT}\n\n${renderChatContext(context)}`;
+
   try {
     const completion = await client.chat.completions.create({
       model,
       temperature: 0.7,
       max_tokens: 400,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: systemPrompt },
         ...parsed.messages
           .filter((m) => m.role !== "system")
           .map((m) => ({ role: m.role, content: m.content })),

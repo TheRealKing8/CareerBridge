@@ -23,14 +23,24 @@ export async function ReportsView() {
             live on every page load.
           </p>
         </div>
-        <a
-          href="/api/admin/reports/users.csv"
-          download
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-background"
-        >
-          <span aria-hidden>↓</span>
-          Download CSV
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/api/admin/reports/users.csv"
+            download
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-background"
+          >
+            <span aria-hidden>↓</span>
+            Download CSV
+          </a>
+          <a
+            href="/api/admin/reports/users.pdf"
+            download
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-background"
+          >
+            <span aria-hidden>↓</span>
+            Download PDF
+          </a>
+        </div>
       </div>
 
       <section>

@@ -1,4 +1,5 @@
 import { JobCard } from "@/components/jobs/JobCard";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { prisma } from "@/lib/prisma";
 import { JOB_TYPES } from "@/lib/enums";
 import Link from "next/link";
@@ -57,12 +58,11 @@ export default async function JobsPage({ searchParams }: PageProps) {
       </div>
 
       <form className="mb-6 flex flex-col gap-3 sm:flex-row" method="get">
-        <input
-          type="text"
+        <SearchInput
           name="q"
           defaultValue={q ?? ""}
           placeholder="Search by title, location, keyword…"
-          className="flex-1 rounded-lg border border-border bg-card px-4 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
+          className="flex-1"
         />
         <select
           name="type"

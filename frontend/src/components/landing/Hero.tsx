@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { JOB_TYPES } from "@/lib/enums";
 import { formatJobType } from "@/lib/format";
+import { SearchInput } from "@/components/ui/SearchInput";
 
 const CATEGORIES: Array<{ label: string; href: string }> = [
   { label: "Internships", href: "/jobs?type=INTERNSHIP" },
@@ -22,9 +24,13 @@ const POPULAR: Array<{ label: string; href: string }> = [
 
 /**
  * Fiverr-style hero. Centered, search-first.
- * Server component — the search form posts a plain GET to /jobs.
+ * Server component — reads the live open-jobs count and the search
+ * form posts a plain GET to /jobs.
  */
-export function Hero() {
+export async function Hero() {
+  const openJobs = await prisma.job.count({ where: { status: "OPEN" } });
+  const openJobsLabel = new Intl.NumberFormat("en-US").format(openJobs);
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary py-16 text-white sm:py-24">
       {/* Decorative blur orbs */}
@@ -34,9 +40,9 @@ export function Hero() {
       </div>
 
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-        {/* Stat chip */}
+        {/* Stat chip — live count from the database */}
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur">
-          <span aria-hidden>🚀</span> 1,200+ opportunities this week
+          <span aria-hidden>🚀</span> {openJobsLabel} open opportunities this week
         </span>
 
         {/* Headline */}
@@ -73,12 +79,12 @@ export function Hero() {
               </option>
             ))}
           </select>
-          <input
-            type="text"
+          <SearchInput
             name="q"
             placeholder="Search by title, company, or keyword…"
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none"
-          />
+            className="flex-1"
+            inputClassName="border-0 bg-transparent px-4 py-2 pl-9 focus:border-0 focus:ring-0"
+            />
           <button
             type="submit"
             className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"

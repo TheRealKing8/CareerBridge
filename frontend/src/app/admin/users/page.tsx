@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/session";
 import { usersService } from "@/lib/services/users";
 import { USER_ROLES, type UserRole } from "@/lib/enums";
 import { UserRowActions } from "@/components/admin/UserRowActions";
+import { SearchInput } from "@/components/ui/SearchInput";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -82,12 +83,11 @@ export default async function AdminUsersPage({
         {roleFilter ? (
           <input type="hidden" name="role" value={roleFilter} />
         ) : null}
-        <input
-          type="search"
+        <SearchInput
           name="q"
           defaultValue={trimmedQ ?? ""}
           placeholder="Search by name or email…"
-          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="flex-1"
         />
         <button
           type="submit"
