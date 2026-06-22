@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { EmailVerificationBanner } from "@/components/site/EmailVerificationBanner";
 import { getCurrentUser } from "@/lib/session";
+import { getDashboardTheme } from "@/lib/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,10 +36,18 @@ export default async function RootLayout({
   // banner sits above it.
   const showVerify =
     user != null && user.emailVerified == null;
+  // Read the dashboard theme server-side so the SSR HTML already has
+  // the matching `data-dash-theme` attribute. Without this, the inline
+  // <script> below sets the attribute before React hydrates and React
+  // reports a hydration mismatch. Keeping the inline script as a
+  // pre-paint guard for the (rare) case the cookie is toggled between
+  // the response being sent and the browser parsing the HTML.
+  const dashTheme = await getDashboardTheme();
 
   return (
     <html
       lang="en"
+      data-dash-theme={dashTheme}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
@@ -47,7 +56,9 @@ export default async function RootLayout({
             <html> element. Public pages don't render any descendant
             with that selector active (the wrapper only exists under
             /admin, /employer, /dashboard), so this is a no-op for
-            them. Avoids a light-flash on dark dashboards. */}
+            them. Avoids a light-flash on dark dashboards. The server
+            already sets data-dash-theme above; this script is a
+            safety-net for cookie changes mid-flight. */}
         <script
           dangerouslySetInnerHTML={{
             __html:

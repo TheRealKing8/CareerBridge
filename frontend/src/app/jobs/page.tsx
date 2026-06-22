@@ -4,6 +4,9 @@ import { JOB_TYPES } from "@/lib/enums";
 import Link from "next/link";
 import { formatJobType } from "@/lib/format";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const PAGE_SIZE = 12;
 
 interface PageProps {

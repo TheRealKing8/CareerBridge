@@ -1,7 +1,9 @@
-import Link from "next/link";
 import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { EmployerRowActions } from "@/components/admin/EmployerRowActions";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 /**
  * /admin/employers — employer verification + account-status queue.
@@ -27,13 +29,7 @@ export default async function AdminEmployersPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Employers</h1>
         <p className="mt-1 text-sm text-muted">
-          Verify company profiles and manage account status.{" "}
-          <Link
-            href="/admin"
-            className="text-primary hover:underline"
-          >
-            Back to overview
-          </Link>
+          Verify company profiles and manage account status.
         </p>
       </div>
 

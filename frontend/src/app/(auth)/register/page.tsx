@@ -2,6 +2,9 @@ import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { USER_ROLES, type UserRole } from "@/lib/enums";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * /register — sign up as a Student, Employer, or Employee.
  *

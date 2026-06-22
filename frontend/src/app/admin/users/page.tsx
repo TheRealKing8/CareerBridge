@@ -4,6 +4,9 @@ import { usersService } from "@/lib/services/users";
 import { USER_ROLES, type UserRole } from "@/lib/enums";
 import { UserRowActions } from "@/components/admin/UserRowActions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * /admin/users — all platform users, filterable by role, searchable by
  * name/email. Admins can:
@@ -53,10 +56,7 @@ export default async function AdminUsersPage({
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
         <p className="mt-1 text-sm text-muted">
-          All platform users. Change role, suspend, or delete.{" "}
-          <Link href="/admin" className="text-primary hover:underline">
-            Back to overview
-          </Link>
+          All platform users. Change role, suspend, or delete.
         </p>
       </div>
 

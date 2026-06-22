@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * /forgot-password — request a reset link.
  *

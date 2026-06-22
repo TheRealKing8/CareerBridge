@@ -60,3 +60,6 @@ next-env.d.ts
 /scripts/get-ids.ts
 /prisma/scripts/
 
+# dev server logfile (created by local `npm run dev > .dev.log` invocations)
+/.dev.log
+

@@ -1,10 +1,11 @@
-import { PlaceholderPanel } from "@/components/dashboard/PlaceholderPanel";
+import { requireRole } from "@/lib/session";
+import { ReportsView } from "@/components/admin/ReportsView";
 
-export default function Page() {
-  return (
-    <PlaceholderPanel
-      title="Reports"
-      description="Platform-wide analytics: signups per week, applications per job, time-to-hire, employer response rates, top skills."
-    />
-  );
+// Real, live data on every request.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function ReportsPage() {
+  await requireRole(["ADMIN"]);
+  return <ReportsView />;
 }

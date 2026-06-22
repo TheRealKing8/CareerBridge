@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * /reset-password?token=… — consume a reset link.
  *

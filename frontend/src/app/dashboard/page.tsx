@@ -3,6 +3,9 @@ import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { formatSalary } from "@/lib/format";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * /dashboard — overview for both STUDENT and EMPLOYEE users.
  *

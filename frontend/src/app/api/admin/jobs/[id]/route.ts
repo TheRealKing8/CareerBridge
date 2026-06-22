@@ -14,6 +14,8 @@ import { csrfOk, csrfRejectedResponse } from "@/lib/csrf";
  * Admin-only. CSRF-protected.
  */
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function PATCH(
   req: Request,

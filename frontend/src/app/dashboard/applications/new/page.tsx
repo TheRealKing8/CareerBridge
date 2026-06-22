@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { formatSalary } from "@/lib/format";
 import { PlaceholderPanel } from "@/components/dashboard/PlaceholderPanel";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * Placeholder for the application form. We only render the job title
  * so we can confirm the click-through from /jobs/[id] works; the real

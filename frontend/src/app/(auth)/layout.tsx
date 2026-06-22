@@ -1,3 +1,5 @@
+import { BackButton } from "@/components/nav/BackButton";
+
 /**
  * Layout for the `(auth)` route group — `/login` and `/register`.
  *
@@ -11,7 +13,12 @@ export default function AuthLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="flex flex-1 items-center justify-center bg-background px-4 py-12 sm:py-20">
-      <div className="w-full max-w-md">{children}</div>
+      <div className="w-full max-w-md">
+        <div className="mb-4">
+          <BackButton />
+        </div>
+        {children}
+      </div>
     </div>
   );
 }

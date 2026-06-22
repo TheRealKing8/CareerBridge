@@ -1,5 +1,8 @@
-import Link from "next/link";
+                             import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 /**
  * /login — credential sign-in.

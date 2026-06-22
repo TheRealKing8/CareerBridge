@@ -3,6 +3,9 @@ import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { JobRowActions } from "@/components/admin/JobRowActions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * /admin/jobs — full job moderation queue.
  *
@@ -39,10 +42,7 @@ export default async function AdminJobsPage({
         <h1 className="text-2xl font-semibold tracking-tight">Jobs</h1>
         <p className="mt-1 text-sm text-muted">
           Approve drafts, close open listings, reopen closed ones, or
-          delete a job entirely.{" "}
-          <Link href="/admin" className="text-primary hover:underline">
-            Back to overview
-          </Link>
+          delete a job entirely.
         </p>
       </div>
 

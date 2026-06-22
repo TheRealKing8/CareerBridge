@@ -19,6 +19,7 @@
       }
     ],
     "baseUrl": ".",
+    "ignoreDeprecations": "5.0", // TODO: drop baseUrl + this flag before TS 7.0 — paths resolves relative to tsconfig when baseUrl is absent.
     "paths": {
       "@/*": ["./src/*"]
     }

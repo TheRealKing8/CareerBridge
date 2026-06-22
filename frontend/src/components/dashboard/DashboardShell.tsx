@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Sidebar, type NavItem } from "./Sidebar";
 import { SignOutButton } from "./SignOutButton";
+import { BackButton } from "@/components/nav/BackButton";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import type { CurrentUser } from "@/lib/session";
 import type { DashboardTheme } from "@/lib/theme";
@@ -33,6 +35,15 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  // The Home button jumps to the public home (/). On a dashboard root
+  // (e.g. /admin, /employer, /dashboard) that would be a step backwards
+  // in context, so suppress it. On nested pages it gives the user a
+  // quick way out of the dashboard.
+  const DASHBOARD_ROOTS = ["/admin", "/employer", "/dashboard"] as const;
+  const isDashboardRoot = (DASHBOARD_ROOTS as readonly string[]).includes(
+    pathname,
+  );
 
   // Close the drawer on route change. We watch the pathname via a
   // custom event the layout doesn't dispatch — simpler to just close on
@@ -120,12 +131,17 @@ export function DashboardShell({
         {/* Main content */}
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
-            <Link
-              href="/"
-              className="mb-4 inline-flex items-center text-xs text-muted hover:text-foreground"
-            >
-              ← Back to site
-            </Link>
+            <div className="mb-4 flex items-center gap-4">
+              <BackButton>← Back</BackButton>
+              {isDashboardRoot ? null : (
+                <Link
+                  href="/"
+                  className="inline-flex items-center text-xs text-muted hover:text-foreground"
+                >
+                  Home
+                </Link>
+              )}
+            </div>
             {children}
           </div>
         </main>
